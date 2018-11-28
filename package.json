@@ -1,0 +1,36 @@
+{
+  "name": "@aboutweb/observable",
+  "version": "0.0.1",
+  "umd" : {
+    "name" : "observable",
+    "exports" : "named"
+  },
+  "description": "Observables using es proxy",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "inputs": "index.js",
+  "scripts": {
+    "test": "mocha",
+    "build": "irrigable-packagejson -s -t",
+    "watch": "npm run build -- -w='test/**'"
+  },
+  "keywords": [],
+  "author": "Stephan Dum",
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stephan-dum/observable.git"
+  },
+  "bugs": {
+    "url": "https://github.com/stephan-dum/obserable/issues"
+  },
+  "homepage": "https://github.com/stephan-dum/obserable#readme",
+  "devDependencies": {
+    "@aboutweb/irrigable-packagejson": "0.0.8",
+    "chai": "^4.2.0",
+    "mocha": "^5.2.0"
+  },
+  "dependencies": {
+    "@aboutweb/proxyscope": "^3.0.1"
+  }
+}
