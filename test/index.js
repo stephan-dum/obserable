@@ -9,162 +9,140 @@ const {
   ProxyObserver
 } = require("../dist/index.js");
 
-//let ao = new ArrayObserver("input");
-/*let po = new ProxyObserver({
-  "hallo" : "wert1",
-  "id2" : "wert2"
-});
+function testListener(po) {
+  it("change listener", function(resolve) {
+    po.on("change", function(property, value) {
+      expect(property).to.equal("fubar");
+      expect(value).to.equal("test");
+      resolve()
+    });
 
-po.on("delete", function(prop) {
-  console.log("stomthing deleted", prop);
-});
+    po.fubar = "test";
+  });
 
-po.on("change", function(prop, value) {
-  console.log("something chagnes", prop, value)
-});
+  it("change$property listener", function(resolve) {
+    po.fubar = "test";
 
-delete po.hallo;
-po.something = "fubar";
-*/
-let po = new ProxyObserver({
-  "hallo" : "wert1",
-  "id2" : "wert2",
-  "sub" : new ProxyObserver({ "sub" : false }),
-  "stays" : "true"
-});
+    po.on("change$fubar", function(value) {
+      expect(value).to.equal("test");
+      resolve();
+    });
+  });
+}
 
-
-
-let m = new ProxyObserver({
-  a : 1,
-  b : 2,
-  c : 3
-});
-
-m.any(["a", "b"], function() {
-  console.log("a | b");
-  
-  this.c = this.a+this.b;
-});
-
-m.on("change$c", function(c) {
-  console.log("new c", c)
-});
-
-m.set({
-  a : 2,
-  b : 3
+describe("observable", function() {
+  it("should wait for event handlers before emitting any event", function(resolve) {
+    let observer = new Observable();
+    observer.emit("test");
+    observer.on("test", resolve);
+  })
 })
 
+describe("observable Array", function() {
+  let ao;
 
-Promise.all([
-  new Promise((resolve, reject) => {
-    po.on("delete$hallo", resolve);
-  }),
-  new Promise((resolve, reject) => {
-    po.on("delete$id2", resolve);
-  }),
-  new Promise((resolve, reject) => {
-    po.any(["sub", "stay"], resolve);
-  })
-]).then((args) => {
-  console.log("all done", args)
+  beforeEach(() => {
+    ao = new ArrayObserver("input");
+  });
 
+  it("should be an array", function() {
+    expect(Array.isArray(ao)).to.be.true;
+    expect(ao.length).to.equal(1);
+    expect(ao instanceof Array).to.be.true;
+  });
+
+  it("should emit push", function() {
+    ao.on("push", () => { resolve(); })
+
+    ao.push("more");
+    expect(ao.length).to.equal(2);
+    expect(ao[0]).to.equal("input");
+    expect(ao[1]).to.equal("more");
+  });
+
+  it("changes", function() {
+    testListener(ao);
+  });
 });
 
+describe("observable Proxy", function() {
+  let po;
 
-po.set({
-  sub : {"sub" : true},
-  "stays" : "true"
-});
-
-
-let k = Object.keys(po);
-
-function ba() {
-  describe("observable", function() {
-    it("should wait for event handlers before emitting any event", function(resolve) {
-      let observer = new Observable();
-      observer.emit("test");
-      observer.on("test", resolve);
-    })
-  })
-
-  describe("obserable Array", function() {
-    let ao = new ArrayObserver("input");
-
-    it("should be an array", function() {
-      expect(Array.isArray(ao)).to.be.true;
-      expect(ao.length).to.equal(1);
-
-      ao.push("more");
-
-      expect(ao.length).to.equal(2);
-      expect(ao[0]).to.equal("input");
-      expect(ao[1]).to.equal("more");
-
-    })
-
-  });
-
-  describe("obserable Object", function() {
-
-  });
-
-  describe("obserable Array", function() {
-
-  });
-
-  describe("obserable Proxy", function() {
-    let po;
-
-    beforeEach(() => {
-      po = new ProxyObserver({
+  beforeEach(() => {
+    po = new ProxyObserver({
       "hallo" : "wert1",
       "id2" : "wert2"
     });
-    });
-
-    it("change listener", function(resolve) {
-      po.on("change", function(property, value) {
-        expect(property).to.equal("fubar");
-        expect(value).to.equal("test");
-        resolve()
-      });
-
-      po.fubar = "test";
-    });
-
-    it("change$property listener", function(resolve) {
-      po.fubar = "test";
-
-      po.on("change$fubar", function(value) {
-        expect(value).to.equal("test");
-        resolve();
-      });
-    });
-
-    it("delete listener", function(resolve) {
-      po.on("delete", function(property) {
-        expect(property).to.equal("hallo");
-        resolve();
-      });
-
-      delete po.hallo;
-    });
-
-    it("delete$property listener", function(resolve) {
-      po.on("delete$hallo", resolve);
-
-      delete po.hallo;
-    });
-
-    it("set listener", function(resolve) {
-      subpo = new ProxyObserver({ "sub" : true });
-
-      po.subpo = subpo;
-
-      po.set({})
-    })
   });
-}
+
+  it("delete listener", function(resolve) {
+    po.on("delete", function(property) {
+      expect(property).to.equal("hallo");
+      resolve();
+    });
+
+    delete po.hallo;
+  });
+
+  it("delete$property listener", function(resolve) {
+    po.on("delete$hallo", resolve);
+
+    delete po.hallo;
+  });
+
+  it("set listener", function() {
+    subpo = new ProxyObserver({ "sub" : true });
+
+    po.subpo = subpo;
+
+    po.set({})
+  });
+
+  it("set deep property", function(resolve) {
+    Promise.all([
+      new Promise((resolve, reject) => {
+        po.on("delete$hallo", resolve);
+      }),
+      new Promise((resolve, reject) => {
+        po.on("delete$id2", resolve);
+      }),
+      new Promise((resolve, reject) => {
+        po.any(["sub", "stay"], resolve);
+      })
+    ]).then((args) => {
+      resolve();
+    });
+
+
+    po.set({
+      sub : {"sub" : true},
+      "stays" : "true"
+    });
+
+  });
+
+  it("math any", function(resolve) {
+    let m = new ProxyObserver({
+      a : 1,
+      b : 2,
+      c : 3
+    });
+
+    m.any(["a", "b"], function() {
+      this.c = this.a+this.b;
+    });
+
+    m.on("change$c", function(c) {
+      resolve();
+    });
+
+    m.set({
+      a : 2,
+      b : 3
+    });
+  })
+
+  it("changes", function() {
+    testListener(po);
+  });
+});
