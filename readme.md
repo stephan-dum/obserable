@@ -6,16 +6,16 @@ Observer and hook into changes made to Objects or Arrays. Events will not get em
 
 ## General Events
 + `.on('change', function(property, value))`
-  - if any property changes
+  if any property changes
 + `.on('change$'+property, function(value))`
-  - when ever property changes
+  when ever property changes
 
 ## ArrayObserver
   Inherits from Array and Observable
 
 ### Methods
 
-#### set(newValue : Array)
++ `set(newValue : Array)`
   removes all old entries and inserts the new data
 
 ### Special Events
@@ -100,14 +100,14 @@ Inherits from Obserable. When using set or assign events with `.any` will get tr
 
 ### Methods
 
-#### set(newValue : Object)
-removes all old entries and inserts the new data
++ `set(newValue : Object)`
+  removes all old entries and inserts the new data
 
-#### assign(newValue : Object, mode : Enum["assign", "set"] = "assign")
-assign newValue to old entries
++ `assign(newValue : Object, mode : Enum["assign", "set"] = "assign")`
+  assign newValue to old entries
 
-#### any(events : Array, callback : Function)
-if any of this events is fired the callback function will be invoked.
++ `any(events : Array, callback : Function)`
+  if any of this events is fired the callback function will be invoked.
 
 ### Special Events
 + `.on('delete', function(property : String))`
